@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GuitarDZ | Store Admin</title>
+  <style>
+    :root{--navy:#171d2a;--gold:#e7a23b;--bg:#f4f6f9;--card:#fff;--ink:#202535;--muted:#737d8d;--line:#e5e8ee;--red:#c83d4d;--green:#218653}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif}
+    header{background:var(--navy);color:#fff;padding:17px 6%;display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .brand{font-size:22px;font-weight:800}.brand span{color:var(--gold)}button{border:0;border-radius:7px;padding:11px 15px;font-weight:700;cursor:pointer}
+    .primary{background:var(--gold);color:#171923}.secondary{background:#edf0f4;color:#303849}.danger{background:#fff0f1;color:var(--red)}
+    main{max-width:1050px;margin:32px auto;padding:0 18px}.panel{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;margin-bottom:20px}
+    h1{font-size:27px;margin:0 0 7px}h2{font-size:19px;margin:0 0 17px}.muted{color:var(--muted);font-size:14px;line-height:1.5}
+    label{display:block;font-size:13px;font-weight:700;margin:13px 0 6px}input,textarea{width:100%;padding:11px 12px;border:1px solid #d8dde6;border-radius:7px;font:inherit;background:white}
+    textarea{min-height:85px;resize:vertical}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}
+    .hidden{display:none!important}.notice{padding:12px;border-radius:8px;margin:12px 0;font-size:14px;white-space:pre-wrap}.error{background:#fff0f1;color:#9e2634}.success{background:#eaf8f0;color:#176b40}
+    .topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.product{display:grid;grid-template-columns:76px 1fr auto;gap:14px;align-items:center;padding:13px 0;border-top:1px solid var(--line)}
+    .product img{width:76px;height:70px;object-fit:cover;border-radius:8px;background:#eee}.product strong{display:block;margin-bottom:5px}.product small{color:var(--muted)}
+    .product-actions{display:flex;gap:7px;flex-wrap:wrap}.product-actions button{padding:8px 10px}
+    #loginBox{max-width:440px;margin:55px auto}.empty{padding:22px;text-align:center;color:var(--muted)}
+    @media(max-width:650px){.grid{grid-template-columns:1fr}.product{grid-template-columns:62px 1fr}.product img{width:62px;height:62px}.product-actions{grid-column:2}.product-actions button{font-size:12px}}
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand">Guitar<span>DZ</span> <small style="font-size:12px;font-weight:400;color:#cbd0da"> / Admin</small></div>
+  <button id="logoutBtn" class="secondary hidden">Log out</button>
+</header>
+
+<main>
+  <section id="loginBox" class="panel">
+    <h1>Store owner login</h1>
+    <p class="muted">Sign in with the email and password created for the GuitarDZ store.</p>
+    <form id="loginForm">
+      <label for="email">Email</label><input id="email" type="email" autocomplete="username" required>
+      <label for="password">Password</label><input id="password" type="password" autocomplete="current-password" required>
+      <div class="actions"><button class="primary" type="submit">Log in</button></div>
+    </form>
+    <div id="loginMessage" aria-live="polite"></div>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <div class="panel">
+      <div class="topline"><div><h1>Store dashboard</h1><p id="storeLabel" class="muted">Loading your store…</p></div><a href="index.html" target="_blank">View public store ↗</a></div>
+    </div>
+
+    <section class="panel">
+      <h2 id="formTitle">Add a product</h2>
+      <form id="productForm">
+        <input type="hidden" id="productId">
+        <div class="grid">
+          <div><label for="productName">Product name *</label><input id="productName" required maxlength="120"></div>
+          <div><label for="productPrice">Price (DZD) *</label><input id="productPrice" type="number" min="0" step="0.01" required></div>
+        </div>
+        <div class="grid">
+          <div><label for="productCategory">Category</label><input id="productCategory" placeholder="Acoustic, Electric, Accessories"></div>
+          <div><label for="productImage">Product photo</label><input id="productImage" type="file" accept="image/*"></div>
+        </div>
+        <label for="productDescription">Description</label><textarea id="productDescription"></textarea>
+        <p class="muted">Choose a photo to upload it to your store. If you leave it empty while editing, the existing photo stays unchanged.</p>
+        <div class="actions">
+          <button class="primary" type="submit" id="saveBtn">Save product</button>
+          <button class="secondary hidden" type="button" id="cancelEdit">Cancel edit</button>
+        </div>
+      </form>
+      <div id="formMessage" aria-live="polite"></div>
+    </section>
+
+    <section class="panel">
+      <div class="topline"><h2>Your products</h2><button class="secondary" id="refreshBtn" type="button">Refresh</button></div>
+      <div id="productsList"><div class="empty">Loading products…</div></div>
+    </section>
+  </section>
+</main>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  // Public project settings. Never put a Supabase secret/service_role key in this file.
+  const SUPABASE_URL = 'https://nreqrfepnaexnpsrkddc.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_0ICrIgT0O4vCnM33qhlXNA_NB-uWBvs';
+  const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+  const $ = id => document.getElementById(id);
+  let currentUser = null;
+  let currentStoreId = null;
+  let editingImageUrl = '';
+
+  function message(target, text, type='error') {
+    $(target).innerHTML = '';
+    if (!text) return;
+    const div = document.createElement('div');
+    div.className = `notice ${type}`;
+    div.textContent = text;
+    $(target).appendChild(div);
+  }
+  function showLogin() {
+    $('loginBox').classList.remove('hidden');
+    $('dashboard').classList.add('hidden');
+    $('logoutBtn').classList.add('hidden');
+  }
+  function showDashboard() {
+    $('loginBox').classList.add('hidden');
+    $('dashboard').classList.remove('hidden');
+    $('logoutBtn').classList.remove('hidden');
+  }
+  function explainError(error) {
+    const msg = error?.message || String(error);
+    if (/relation .* does not exist|column .* does not exist/i.test(msg)) {
+      return msg + '\\nThe table or column names in this dashboard do not match your database schema.';
+    }
+    if (/row-level security|permission denied|not allowed/i.test(msg)) {
+      return msg + '\\nCheck the Supabase RLS policies for profiles, products, and the store-images bucket.';
+    }
+    return msg;
+  }
+
+  async function loadStore() {
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('store_id')
+      .eq('user_id', currentUser.id)
+      .single();
+    if (error) throw error;
+    if (!profile?.store_id) throw new Error('This account is not linked to a store yet. Check profiles.store_id.');
+    currentStoreId = profile.store_id;
+
+    const { data: store, error: storeError } = await supabase
+      .from('stores')
+      .select('name')
+      .eq('id', currentStoreId)
+      .single();
+    if (storeError) throw storeError;
+    $('storeLabel').textContent = `Managing: ${store.name}`;
+  }
+
+  async function loadProducts() {
+    $('productsList').innerHTML = '<div class="empty">Loading products…</div>';
+    const { data, error } = await supabase
+      .from('products')
+      .select('id, name, description, price, category, image_url')
+      .eq('store_id', currentStoreId)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+    $('productsList').innerHTML = '';
+    if (!data?.length) {
+      $('productsList').innerHTML = '<div class="empty">No products yet. Add your first product above.</div>';
+      return;
+    }
+    for (const p of data) {
+      const row = document.createElement('div');
+      row.className = 'product';
+      const img = document.createElement('img');
+      img.src = p.image_url || 'https://placehold.co/160x140?text=GuitarDZ';
+      img.alt = p.name || 'Product photo';
+      const info = document.createElement('div');
+      const name = document.createElement('strong'); name.textContent = p.name || 'Unnamed product';
+      const detail = document.createElement('small');
+      detail.textContent = `${Number(p.price || 0).toLocaleString()} DZD${p.category ? ' · ' + p.category : ''}`;
+      info.append(name, detail);
+      const actions = document.createElement('div'); actions.className = 'product-actions';
+      const edit = document.createElement('button'); edit.className = 'secondary'; edit.textContent = 'Edit';
+      edit.addEventListener('click', () => startEdit(p));
+      const del = document.createElement('button'); del.className = 'danger'; del.textContent = 'Delete';
+      del.addEventListener('click', () => deleteProduct(p));
+      actions.append(edit, del);
+      row.append(img, info, actions);
+      $('productsList').appendChild(row);
+    }
+  }
+
+  function startEdit(p) {
+    $('productId').value = p.id;
+    $('productName').value = p.name || '';
+    $('productPrice').value = p.price ?? '';
+    $('productCategory').value = p.category || '';
+    $('productDescription').value = p.description || '';
+    $('productImage').value = '';
+    editingImageUrl = p.image_url || '';
+    $('formTitle').textContent = 'Edit product';
+    $('saveBtn').textContent = 'Save changes';
+    $('cancelEdit').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function resetForm() {
+    $('productForm').reset();
+    $('productId').value = '';
+    editingImageUrl = '';
+    $('formTitle').textContent = 'Add a product';
+    $('saveBtn').textContent = 'Save product';
+    $('cancelEdit').classList.add('hidden');
+    message('formMessage', '');
+  }
+
+  async function uploadPhoto(file) {
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const path = `${currentStoreId}/${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from('store-images').upload(path, file, {
+      cacheControl: '3600', upsert: false, contentType: file.type
+    });
+    if (error) throw error;
+    const { data } = supabase.storage.from('store-images').getPublicUrl(path);
+    return data.publicUrl;
+  }
+
+  $('loginForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    message('loginMessage', 'Signing in…', 'success');
+    const { error } = await supabase.auth.signInWithPassword({
+      email: $('email').value.trim(),
+      password: $('password').value
+    });
+    if (error) { message('loginMessage', explainError(error)); return; }
+    const { data } = await supabase.auth.getUser();
+    currentUser = data.user;
+    try {
+      await loadStore();
+      showDashboard();
+      await loadProducts();
+      message('loginMessage', '');
+    } catch (e) {
+      await supabase.auth.signOut();
+      currentUser = null;
+      showLogin();
+      message('loginMessage', explainError(e));
+    }
+  });
+
+  $('productForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    $('saveBtn').disabled = true;
+    message('formMessage', 'Saving product…', 'success');
+    try {
+      let imageUrl = editingImageUrl;
+      const file = $('productImage').files[0];
+      if (file) imageUrl = await uploadPhoto(file);
+
+      const product = {
+        store_id: currentStoreId,
+        name: $('productName').value.trim(),
+        description: $('productDescription').value.trim(),
+        price: Number($('productPrice').value),
+        category: $('productCategory').value.trim(),
+        image_url: imageUrl || null
+      };
+      const id = $('productId').value;
+      let result;
+      if (id) {
+        result = await supabase.from('products').update(product).eq('id', id).eq('store_id', currentStoreId);
+      } else {
+        result = await supabase.from('products').insert(product);
+      }
+      if (result.error) throw result.error;
+      resetForm();
+      message('formMessage', 'Product saved successfully.', 'success');
+      await loadProducts();
+    } catch (e) {
+      message('formMessage', explainError(e));
+    } finally {
+      $('saveBtn').disabled = false;
+    }
+  });
+
+  async function deleteProduct(p) {
+    if (!confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
+    const { error } = await supabase.from('products').delete().eq('id', p.id).eq('store_id', currentStoreId);
+    if (error) { message('formMessage', explainError(error)); return; }
+    await loadProducts();
+    message('formMessage', 'Product deleted.', 'success');
+  }
+
+  $('cancelEdit').addEventListener('click', resetForm);
+  $('refreshBtn').addEventListener('click', async () => {
+    try { await loadProducts(); message('formMessage', 'Products refreshed.', 'success'); }
+    catch (e) { message('formMessage', explainError(e)); }
+  });
+  $('logoutBtn').addEventListener('click', async () => {
+    await supabase.auth.signOut();
+    currentUser = null; currentStoreId = null;
+    showLogin();
+  });
+
+  // Restore an existing session after page refresh.
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (sessionData.session) {
+    currentUser = sessionData.session.user;
+    try {
+      await loadStore();
+      showDashboard();
+      await loadProducts();
+    } catch (e) {
+      await supabase.auth.signOut();
+      showLogin();
+      message('loginMessage', explainError(e));
+    }
+  }
+</script>
+</body>
+</html>
