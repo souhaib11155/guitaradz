@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GuitarDZ | Guitar Store</title>
+  <style>
+    :root { --bg:#f5f6f8; --card:#fff; --ink:#171923; --muted:#687080; --accent:#e7a23b; --line:#e7e9ee; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Arial, sans-serif; background:var(--bg); color:var(--ink); }
+    header { background:#151923; color:white; padding:18px 7%; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .brand { font-size:24px; font-weight:800; letter-spacing:.5px; }
+    .brand span { color:var(--accent); }
+    nav { display:flex; gap:18px; flex-wrap:wrap; }
+    nav a { color:#e8eaf0; text-decoration:none; font-size:14px; }
+    .hero { padding:62px 7%; background:linear-gradient(115deg,#202634,#11151d); color:white; }
+    .hero h1 { font-size:clamp(30px,5vw,52px); margin:0 0 12px; max-width:650px; }
+    .hero p { color:#c5cad4; max-width:520px; line-height:1.6; margin:0 0 24px; }
+    .hero a { display:inline-block; background:var(--accent); color:#171923; padding:12px 20px; border-radius:7px; text-decoration:none; font-weight:700; }
+    main { padding:42px 7% 60px; }
+    .section-head { display:flex; justify-content:space-between; align-items:end; gap:16px; margin-bottom:22px; flex-wrap:wrap; }
+    h2 { margin:0; font-size:28px; }
+    .section-head p { color:var(--muted); margin:7px 0 0; }
+    .products { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
+    .product { background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+    .product img { width:100%; height:190px; object-fit:cover; background:#e8e9ec; display:block; }
+    .product-info { padding:16px; }
+    .tag { color:#8a5a12; background:#fff3df; display:inline-block; padding:5px 8px; border-radius:20px; font-size:11px; font-weight:700; }
+    .product h3 { margin:12px 0 7px; font-size:18px; }
+    .description { color:var(--muted); font-size:13px; line-height:1.5; min-height:38px; }
+    .bottom { display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:10px; }
+    .price { font-weight:800; font-size:18px; }
+    .contact { background:#fff; border:1px solid var(--line); padding:24px; border-radius:12px; margin-top:38px; }
+    .contact p { color:var(--muted); line-height:1.6; }
+    footer { background:#151923; color:#aeb5c2; text-align:center; padding:20px; font-size:13px; }
+    @media(max-width:600px) { header { align-items:flex-start; flex-direction:column; } nav { gap:12px; } .hero { padding-top:45px; padding-bottom:45px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">Guitar<span>DZ</span></div>
+    <nav>
+      <a href="#home">Home</a>
+      <a href="#products">Products</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <section class="hero" id="home">
+    <h1>Find your sound.</h1>
+    <p>Discover guitars and music essentials at GuitarDZ. Simple gear, great sound, and a store made for musicians.</p>
+    <a href="#products">Browse products</a>
+  </section>
+
+  <main>
+    <section id="products">
+      <div class="section-head">
+        <div>
+          <h2>Our products</h2>
+          <p>A few picks to get you started.</p>
+        </div>
+      </div>
+
+      <div class="products">
+        <article class="product">
+          <img src="https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=900&q=80" alt="Acoustic guitar">
+          <div class="product-info">
+            <span class="tag">ACOUSTIC</span>
+            <h3>Classic Acoustic Guitar</h3>
+            <div class="description">A comfortable acoustic guitar for practice and everyday playing.</div>
+            <div class="bottom"><span class="price">18,500 DZD</span></div>
+          </div>
+        </article>
+
+        <article class="product">
+          <img src="https://images.unsplash.com/photo-1564186060792-4e6c4f6f8b6f?auto=format&fit=crop&w=900&q=80" alt="Electric guitar">
+          <div class="product-info">
+            <span class="tag">ELECTRIC</span>
+            <h3>Electric Guitar</h3>
+            <div class="description">A versatile electric guitar for rock, blues, and more.</div>
+            <div class="bottom"><span class="price">32,000 DZD</span></div>
+          </div>
+        </article>
+
+        <article class="product">
+          <img src="https://images.unsplash.com/photo-1588449668365-d15e397f6787?auto=format&fit=crop&w=900&q=80" alt="Guitar amplifier">
+          <div class="product-info">
+            <span class="tag">ACCESSORY</span>
+            <h3>Practice Amplifier</h3>
+            <div class="description">A compact amplifier for home practice and small sessions.</div>
+            <div class="bottom"><span class="price">14,000 DZD</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="contact" id="contact">
+      <h2>Contact GuitarDZ</h2>
+      <p>Have a question about a product? Contact the store owner to check availability and ordering details.</p>
+      <p><strong>Phone:</strong> Add your store phone number here<br>
+         <strong>Instagram:</strong> Add your Instagram username here</p>
+    </section>
+  </main>
+
+  <footer>© 2026 GuitarDZ. All rights reserved.</footer>
+</body>
+</html>
